@@ -6,7 +6,6 @@ from streamlit_folium import folium_static
 import folium
 import random
 from datetime import datetime
-import matplotlib.pyplot as plt
 
 # --------------------------------------------------- #
 # --------------- DATA READING ---------------------- #
@@ -17,10 +16,19 @@ def get_data(start_date, end_date):
     This function should return a dataframe with columns such as year, latitude, longitude, comment
     Until raw data is obtained, we'll be using random datapoints
     '''
-    data_size = 10
-    year_range =[2004,2005,2006,2007,2008,2009]
-    temp_df = pd.DataFrame([{'Year':random.choice(year_range),'Latitude':random.random()/50-41.071,
-    'Longitude':random.random()/10-71.17} for i in range(data_size)])
+    data_size = 40
+    year_range = list(range(2004, datetime.now().date().year + 1))
+    locations_range = [[-41.05056689502945, -71.52142543656218],
+                       [-41.0773687745212, -71.52518967193343],
+                       [-41.072723962417925, -71.16194679705137]]
+    temp_df = pd.DataFrame([{
+        'Year':
+        random.choice(year_range),
+        'Latitude':
+        random.random() / 200 + random.choice(locations_range)[0],
+        'Longitude':
+        random.random() / 100 + random.choice(locations_range)[1]
+    } for i in range(data_size)])
 
     temp_df = temp_df[(temp_df['Year'] <= end_date) & (temp_df['Year'] >= start_date)]
     return temp_df.sort_values(by='Year')
@@ -38,6 +46,12 @@ time_range_upper = pd.DataFrame(
 # --------------------------------------------------- #
 # ---------------- STREAMLIT ------------------------ #
 # --------------------------------------------------- #
+st.set_page_config(
+            page_title="Proyectos Virginia", # => Quick reference - Streamlit
+            page_icon="🏠",
+            layout="centered", # wide
+            initial_sidebar_state="auto") # collapsed
+
 st.markdown("""# Proyectos Virginia Bariloche
             """)
 
@@ -62,7 +76,7 @@ proyects_df = get_data(st.session_state.lower_time_range,
 bariloche_coordinates = [-41.13634786671877, -71.31073355248633]
 m = folium.Map(location=[bariloche_coordinates[0], bariloche_coordinates[1]],
                zoom_start=11,
-               tiles='stamenwatercolor')
+               tiles='openstreetmap')
 
 for index,row in proyects_df.iterrows():
     folium.Marker(
@@ -77,10 +91,6 @@ folium_static(m)
 # ------------- PROYECT ANALYSIS -------------------- #
 # --------------------------------------------------- #
 
-# st.bar_chart(np.histogram(proyects_df.Year)[0],
-#              columns=np.histogram(proyects_df.Year)[1])
-
-fig, ax = plt.subplots()
-plt.figure(figsize=(16,6))
-fig = proyects_df.Year.hist()
-st.pyplot(fig)
+st.markdown(f'''Entre {st.session_state.lower_time_range} y
+            {st.session_state.upper_time_range} un
+            total de {proyects_df.shape[0]} proyectos fueron realizados.''')

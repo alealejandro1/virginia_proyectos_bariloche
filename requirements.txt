@@ -1,0 +1,14 @@
+# packaging
+pip>=9
+setuptools>=26
+twine
+wheel>=0.29
+
+# data science
+numpy
+pandas
+
+#Streamlit libraries
+streamlit
+folium
+streamlit_folium
